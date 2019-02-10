@@ -70,7 +70,7 @@ public:
     void define_agent_symbol(int no, int group, int index);
     void define_event_node(int no, int op, int *inputs, int n_inputs);
     void add_reward_rule(int on, int *receivers, float *values, int n_receiver,
-                         bool is_terminal, bool auto_value);
+                         bool die, bool is_terminal, bool auto_value);
 
 private:
     // reward description

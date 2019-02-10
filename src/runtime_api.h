@@ -52,7 +52,7 @@ int gridworld_set_goal(EnvHandle game, GroupHandle group, const char *method, co
 int gridworld_define_agent_symbol(EnvHandle game, int no, int group, int index);
 int gridworld_define_event_node(EnvHandle game, int no, int op, int *inputs, int n_inputs);
 int gridworld_add_reward_rule(EnvHandle game, int on, int *receiver, float *value, int n_receiver,
-                              bool is_terminal, bool auto_value);
+                              bool die, bool is_terminal, bool auto_value);
 
 /**
  *  DiscreteSnake special

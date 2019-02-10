@@ -550,7 +550,7 @@ class GridWorld(Environment):
             _LIB.gridworld_define_event_node(game, no, event.op, as_int32_c_array(inputs), n_inputs)
 
         for rule in config.reward_rules:
-            # rule = [on, receiver, value, terminal]
+            # rule = [on, receiver, value, die, terminal]
             on = event2int[rule[0]]
 
             receiver = np.zeros_like(rule[1], dtype=np.int32)
@@ -562,7 +562,7 @@ class GridWorld(Environment):
                 value = np.array(rule[2], dtype=np.float32)
             n_receiver = len(receiver)
             _LIB.gridworld_add_reward_rule(game, on, as_int32_c_array(receiver),
-                                           as_float_c_array(value), n_receiver, rule[3])
+                                           as_float_c_array(value), n_receiver, rule[3], rule[4])
 
 
 '''
@@ -739,7 +739,7 @@ class Config:
         self.groups.append(agent_type)
         return no
 
-    def add_reward_rule(self, on, receiver, value, terminal=False):
+    def add_reward_rule(self, on, receiver, value, die=False, terminal=False):
         """ add a reward rule
 
         Some note:
@@ -763,7 +763,7 @@ class Config:
             value = [value]
         if len(receiver) != len(value):
             raise Exception("the length of receiver and value should be equal")
-        self.reward_rules.append([on, receiver, value, terminal])
+        self.reward_rules.append([on, receiver, value, die, terminal])
 
 
 class CircleRange:

@@ -49,7 +49,7 @@ void GridWorld::define_event_node(int no, int op, int *inputs, int n_inputs) {
 }
 
 void GridWorld::add_reward_rule(int on, int *receivers, float *values, int n_receiver,
-                                bool is_terminal, bool auto_value) {
+                                bool die, bool is_terminal, bool auto_value) {
 //    TRACE_PRINT("define rule on=%d rec,val=[", on);
 //    for (int i = 0; i < n_receiver; i++)
 //        TRACE_PRINT("%d %g, ", receiver[i], value[i]);
@@ -62,6 +62,7 @@ void GridWorld::add_reward_rule(int on, int *receivers, float *values, int n_rec
         rule.raw_parameter.push_back(receivers[i]);
         rule.values.push_back(values[i]);
     }
+    rule.die = die;
     rule.is_terminal = is_terminal;
     rule.auto_value  = auto_value;
 
@@ -381,9 +382,22 @@ void GridWorld::calc_rule(std::vector<AgentSymbol *> &input_symbols,
                 AgentSymbol *sym = receivers[i];
                 if (sym->is_all()) {
                     groups[sym->group].add_reward(rule.values[i]);
+                    /* die rule */
+                    if (rule.die) {
+                        const std::vector<Agent*> &agents = groups[sym->group].get_agents();
+                        for (int i = 0; i < agents.size(); i++) {
+                            agents[i]->set_dead(true);
+                            map.remove_agent(agents[i]);
+                        }
+                    }
                 } else {
                     Agent* agent = (Agent *)sym->entity;
                     agent->add_reward(rule.values[i]);
+                    /* die rule */
+                    if (rule.die) {
+                        agent->set_dead(true);
+                        map.remove_agent(agent);
+                    }
                 }
             }
         }

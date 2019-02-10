@@ -140,9 +140,9 @@ int gridworld_define_event_node(EnvHandle game, int no, int op, int *inputs, int
 }
 
 int gridworld_add_reward_rule(EnvHandle game, int on, int *receiver, float *value, int n_receiver,
-                              bool is_terminal, bool auto_value) {
+                              bool die, bool is_terminal, bool auto_value) {
     LOG(TRACE) << "gridworld add reward rule";
-    ((::magent::gridworld::GridWorld *)game)->add_reward_rule(on, receiver, value, n_receiver, is_terminal, auto_value);
+    ((::magent::gridworld::GridWorld *)game)->add_reward_rule(on, receiver, value, n_receiver, die, is_terminal, auto_value);
     return 0;
 }
 

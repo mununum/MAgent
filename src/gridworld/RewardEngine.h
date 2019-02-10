@@ -52,6 +52,7 @@ public:
 
     std::vector<AgentSymbol*> receivers;
     std::vector<float> values;
+    bool die;
     bool is_terminal;
     bool auto_value;
 
