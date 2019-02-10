@@ -30,6 +30,9 @@ public:
     float damage, trace, eat_ability, step_recover, kill_supply, food_supply;
     bool attack_in_group;
 
+    bool restrict_movement;
+    int movement_direction; // 0:N, 1:S, 2:W, 3:E
+
     Reward step_reward, kill_reward, dead_penalty, attack_penalty;
 
     int view_x_offset, view_y_offset;

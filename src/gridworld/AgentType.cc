@@ -47,6 +47,8 @@ AgentType::AgentType(int n, std::string name, const char **keys, float *values, 
     step_reward = kill_reward  = dead_penalty = attack_penalty = 0.0;
     can_absorb = false;
 
+    restrict_movement = false;
+
     // init member vars from str (reflection)
     bool is_set;
     for (int i = 0; i < n; i++) {
@@ -77,6 +79,9 @@ AgentType::AgentType(int n, std::string name, const char **keys, float *values, 
         AGENT_TYPE_SET_FLOAT(att_x_offset);  AGENT_TYPE_SET_FLOAT(att_y_offset);
         AGENT_TYPE_SET_FLOAT(turn_x_offset); AGENT_TYPE_SET_FLOAT(turn_y_offset);
 
+        AGENT_TYPE_SET_BOOL(restrict_movement);
+        AGENT_TYPE_SET_INT(movement_direction);
+
         if (!is_set) {
             LOG(FATAL) << "invalid agent config in AgentType::AgentType : " << keys[i];
         }
@@ -102,7 +107,12 @@ AgentType::AgentType(int n, std::string name, const char **keys, float *values, 
         attack_range = new SectorRange(attack_angle, attack_radius, parity);
     }
 
-    move_range   = new CircleRange(speed, 0, 1);
+    if (restrict_movement) {
+        move_range = new FixDirRange(movement_direction);
+    } else {
+        move_range   = new CircleRange(speed, 0, 1);
+    }
+
     view_x_offset = width / 2; view_y_offset = length / 2;
     att_x_offset  = width / 2; att_y_offset  = length / 2;
     turn_x_offset = 0; turn_y_offset = 0;

@@ -189,6 +189,52 @@ public:
     }
 };
 
+class FixDirRange : public Range {
+public:
+    FixDirRange (int direction) {
+        /* direction: 0:N, 1:S, 2:W, 3:E */
+        if (direction < 2) {
+            width = 1;
+            height = 2;
+        } else {
+            width = 2;
+            height = 1;
+        }
+        is_in_range = new bool[width * height];
+        is_in_range[0] = true;
+        is_in_range[1] = true;
+        dx = new int[width * height];
+        dy = new int[width * height];
+        count = 2;
+        switch(direction) {
+        case 0: // up
+            x1 = 0; y1 = -1;
+            x2 = 0; y2 = 0;
+            dx[0] = 0; dy[0] = -1;
+            dx[1] = 0; dy[1] = 0;
+            break;
+        case 1: // down
+            x1 = 0; y1 = 0;
+            x2 = 0; y2 = 1;
+            dx[0] = 0; dy[0] = 0;
+            dx[1] = 0; dy[1] = 1;
+            break;
+        case 2: // left
+            x1 = -1; y1 = 0;
+            x2 = 0; y2 = 0;
+            dx[0] = -1; dy[0] = 0;
+            dx[1] = 0; dy[1] = 0;
+            break;
+        case 3: // right
+            x1 = 0; y1 = 0;
+            x2 = 1; y2 = 0;
+            dx[0] = 0; dy[0] = 0;
+            dx[1] = 1; dy[1] = 0;
+            break;
+        }
+    }
+};
+
 } // namespace gridworld
 } // namespace magent
 
