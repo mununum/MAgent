@@ -57,6 +57,8 @@ public:
                       int view_left_top_x, int view_left_top_y,
                       int view_right_bottom_x, int view_right_bottom_y) const;
 
+    void get_global_state(float *linear_buffer, int n_channel, bool food_mode, bool minimap_mode) const;
+
     PositionInteger get_attack_obj(const AttackAction &attack, int &obj_x, int &obj_y) const;
     Reward do_attack(Agent *agent, PositionInteger pos_int, GroupHandle &dead_group);
 

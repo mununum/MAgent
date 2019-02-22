@@ -206,6 +206,47 @@ void Map::extract_view(const Agent *agent, float *linear_buffer, const int *chan
     }
 }
 
+static inline int transform_channel(int channel_id, bool food_mode, bool minimap_mode) {
+    int base = 1;
+    int scale = 2;
+    if (food_mode)
+        base++;
+    if (minimap_mode)
+        scale++;
+
+    int group_id = (channel_id - base) / scale;
+    // ignore minimap_mode option
+    int new_channel_id = base + group_id * 2;
+    return new_channel_id;
+}
+
+void Map::get_global_state(float *linear_buffer, int n_channel, bool food_mode, bool minimap_mode) const {
+    
+    NDPointer<float, 3> buffer(linear_buffer, {h, w, n_channel});
+    // wall + additional + (has,hp) + (has,hp) + ...
+
+    #pragma omp parallel for
+    for (int x = 0; x < w; x++) {
+        for (int y = 0; y < h; y++) {
+            PositionInteger pos_int = pos2int(x, y);
+            int channel_id = channel_ids[pos_int];
+            // channel_id: -1 none, 0 wall, 1 food (if food_mode)
+            // (has,hp) + (has,hp) + ...
+            if (channel_id != -1) {
+                // if agent
+                if (slots[pos_int].occupier != nullptr && slots[pos_int].occ_type == OCC_AGENT) {
+                    // ignore minimap
+                    channel_id = transform_channel(channel_id, food_mode, minimap_mode);
+                    Agent *p = ((Agent *) slots[pos_int].occupier);
+                    // hp
+                    buffer.at(y, x, channel_id + 1) = p->get_hp() / p->get_type().hp;
+                }
+                buffer.at(y, x, channel_id) = 1;
+            }
+        }
+    }
+}
+
 PositionInteger Map::get_attack_obj(const AttackAction &attack, int &obj_x, int &obj_y) const {
     const Agent *agent = attack.agent;
     const AgentType *type = &attack.agent->get_type();

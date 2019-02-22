@@ -114,6 +114,14 @@ class GridWorld(Environment):
                                   buf.ctypes.data_as(ctypes.POINTER(ctypes.c_int32)))
             self.action_space[handle.value] = (buf[0],)
 
+        # init state buffer
+        n_channel = 1 + len(self.group_handles) * 2
+        if "food_mode" in config.config_dict.keys() and config.config_dict["food_mode"]:
+            n_channel += 1
+        self.state_buf = np.empty((config.config_dict["map_height"],
+                                   config.config_dict["map_width"],
+                                   n_channel), dtype=np.float32)
+
     def reset(self):
         """reset environment"""
         _LIB.env_reset(self.game)
@@ -246,6 +254,11 @@ class GridWorld(Environment):
         _LIB.env_get_observation(self.game, handle, bufs)
 
         return view_buf, feature_buf
+
+    def get_global_state(self):
+        buf = as_float_c_array(self.state_buf)
+        _LIB.env_get_info(self.game, 0, b"global_state", buf)
+        return self.state_buf
 
     def set_action(self, handle, actions):
         """ set actions for whole group

@@ -888,6 +888,12 @@ void GridWorld::get_info(GroupHandle group, const char *name, void *void_buffer)
         }
     } else if (strequ(name, "both_attack")) {
         int_buffer[0] = stat_recorder.both_attack;
+    } else if (strequ(name, "global_state")) {
+        int n_channel = groups.size() * 2 + 1;
+        if (food_mode)
+            n_channel++;
+        memset(float_buffer, 0, sizeof(float) * width * height * n_channel);
+        map.get_global_state(float_buffer, n_channel, food_mode, minimap_mode);
     } else {
         LOG(FATAL) << "unsupported info name in GridWorld::get_info : " << name;
     }
