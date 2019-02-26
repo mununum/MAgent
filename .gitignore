@@ -10,3 +10,5 @@ build
 __pycache__
 save_video
 save_model
+.vscode/launch.json
+.vscode/settings.json

@@ -384,16 +384,18 @@ void GridWorld::get_observation(GroupHandle group, float **linear_buffers) {
         }
 
         // get non-spatial feature
-        agent->get_embedding(feature_buffer.data + i*feature_size, embedding_size);
+        // agent->get_embedding(feature_buffer.data + i*feature_size, embedding_size);
         Position pos = agent->get_pos();
+        feature_buffer.at(i, 0) = pos.x;
+        feature_buffer.at(i, 1) = pos.y;        
         // last action
-        feature_buffer.at(i, embedding_size + agent->get_action()) = 1;
+        // feature_buffer.at(i, embedding_size + agent->get_action()) = 1;
         // last reward
-        feature_buffer.at(i, embedding_size + n_action) = agent->get_last_reward();
-        if (minimap_mode) { // absolute coordination
-            feature_buffer.at(i, embedding_size + n_action + 1) = (float) pos.x / width;
-            feature_buffer.at(i, embedding_size + n_action + 2) = (float) pos.y / height;
-        }
+        // feature_buffer.at(i, embedding_size + n_action) = agent->get_last_reward();
+        // if (minimap_mode) { // absolute coordination
+        //     feature_buffer.at(i, embedding_size + n_action + 1) = (float) pos.x / width;
+        //     feature_buffer.at(i, embedding_size + n_action + 2) = (float) pos.y / height;
+        // }
     }
 
     if (minimap_mode)
@@ -929,6 +931,7 @@ int GridWorld::group2channel(GroupHandle group) {
     return base + group * scale; // wall + additional + (has, hp) + (has, hp) + ...
 }
 
+/*
 int GridWorld::get_feature_size(GroupHandle group) {
     // feature space layout : [embedding, last_action (one hot), last_reward]
     int feature_space = embedding_size + (int)groups[group].get_type().action_space.size() + 1;
@@ -936,6 +939,13 @@ int GridWorld::get_feature_size(GroupHandle group) {
         feature_space += 2;
     if (minimap_mode)  // x, y coordinate
         feature_space += 2;
+    return feature_space;
+}
+*/
+
+int GridWorld::get_feature_size(GroupHandle group) {
+    // new feature space layout : [position]
+    int feature_space = 2; // x, y coordinate
     return feature_space;
 }
 

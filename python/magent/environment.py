@@ -13,6 +13,9 @@ class Environment:
     def get_observation(self, handle):
         pass
 
+    def get_global_state(self):
+        pass
+
     def set_action(self, handle, actions):
         pass
 
@@ -41,3 +44,5 @@ class Environment:
     def get_feature_space(self, handle):
         pass
 
+    def get_state_space(self):
+        pass

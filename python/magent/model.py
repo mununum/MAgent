@@ -118,7 +118,7 @@ class ProcessingModel(BaseModel):
     use pipe or socket for communication
     """
     def __init__(self, env, handle, name, port, sample_buffer_capacity=1000,
-                 RLModel=None, **kwargs):
+                 RLModel=None, use_global_state=False, **kwargs):
         """
         Parameters
         ----------
@@ -132,6 +132,8 @@ class ProcessingModel(BaseModel):
             the maximum number of samples (s,r,a,s') to collect in a game round
         RLModel: BaseModel
             the RL algorithm class
+        use_global_state: bool
+            Use global state in training
         kwargs: dict
             arguments for RLModel
         """
@@ -146,8 +148,9 @@ class ProcessingModel(BaseModel):
         # addr = ('localhost', port) # socket
         proc = multiprocessing.Process(
             target=model_client,
-            args=(addr, sample_buffer_capacity, RLModel, kwargs),
+            args=(addr, sample_buffer_capacity, RLModel, use_global_state, kwargs),
         )
+        self.use_global_state = use_global_state
 
         self.client_proc = proc
         proc.start()
@@ -171,7 +174,7 @@ class ProcessingModel(BaseModel):
         if block:
             self.check_done()
 
-    def infer_action(self, raw_obs, ids, policy='e_greedy', eps=0, block=True):
+    def infer_action(self, raw_obs, ids, policy='e_greedy', eps=0, block=True, state=None):
         """ infer action
 
         Parameters
@@ -191,7 +194,10 @@ class ProcessingModel(BaseModel):
             see above
         """
 
-        package = NDArrayPackage(raw_obs[0], raw_obs[1], ids)
+        if self.use_global_state and state is not None:
+            package = NDArrayPackage(state, raw_obs[0], raw_obs[1], ids)
+        else:
+            package = NDArrayPackage(raw_obs[0], raw_obs[1], ids)
         self.conn.send(["act", policy, eps, package.info])
         package.send_to(self.conn, use_thread=True)
 
@@ -285,7 +291,7 @@ class ProcessingModel(BaseModel):
             quit()
 
 
-def model_client(addr, sample_buffer_capacity, RLModel, model_args):
+def model_client(addr, sample_buffer_capacity, RLModel, use_global_state, model_args):
     """target function for sub-processing to host a model
 
     Parameters
@@ -295,13 +301,15 @@ def model_client(addr, sample_buffer_capacity, RLModel, model_args):
         the maximum number of samples (s,r,a,s') to collect in a game round
     RLModel: BaseModel
         the RL algorithm class
+    use_global_state: bool
+        Use global state in training
     args: dict
         arguments to RLModel
     """
     import magent.utility
 
     model = RLModel(**model_args)
-    sample_buffer = magent.utility.EpisodesBuffer(capacity=sample_buffer_capacity)
+    sample_buffer = magent.utility.EpisodesBuffer(capacity=sample_buffer_capacity, use_global_state=use_global_state)
 
     conn = multiprocessing.connection.Client(addr)
 
@@ -312,7 +320,10 @@ def model_client(addr, sample_buffer_capacity, RLModel, model_args):
             eps = cmd[2]
             array_info = cmd[3]
 
-            view, feature, ids = NDArrayPackage(array_info).recv_from(conn)
+            if use_global_state:
+                state, view, feature, ids = NDArrayPackage(array_info).recv_from(conn)
+            else:
+                view, feature, ids = NDArrayPackage(array_info).recv_from(conn)
             obs = (view, feature)
 
             acts = model.infer_action(obs, ids, policy=policy, eps=eps)
@@ -322,12 +333,15 @@ def model_client(addr, sample_buffer_capacity, RLModel, model_args):
         elif cmd[0] == 'train':
             print_every = cmd[1]
             total_loss, value = model.train(sample_buffer, print_every=print_every)
-            sample_buffer = magent.utility.EpisodesBuffer(sample_buffer_capacity)
+            sample_buffer = magent.utility.EpisodesBuffer(sample_buffer_capacity, use_global_state=use_global_state)
             conn.send((total_loss, value))
         elif cmd[0] == 'sample':
             array_info = cmd[1]
             rewards, alives = NDArrayPackage(array_info).recv_from(conn)
-            sample_buffer.record_step(ids, obs, acts, rewards, alives)
+            if use_global_state:
+                sample_buffer.record_step(ids, obs, acts, rewards, alives, state=state)
+            else:
+                sample_buffer.record_step(ids, obs, acts, rewards, alives)
             conn.send("done")
         elif cmd[0] == 'save':
             savedir = cmd[1]

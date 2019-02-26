@@ -11,7 +11,7 @@ def get_config(map_size):
         "predator",
         {
             'width': 2, 'length': 2, 'hp': 1, 'speed': 1,
-            'view_range': gw.CircleRange(5), 'attack_range': gw.CircleRange(2),
+            'view_range': gw.CircleRange(8), 'attack_range': gw.CircleRange(2),
             'attack_penalty': -0.2
         })
 

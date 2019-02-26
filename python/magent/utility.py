@@ -34,15 +34,20 @@ class EpisodesBuffer:
     """Replay buffer to store a whole episode for all agents
        one entry for one agent
     """
-    def __init__(self, capacity):
+    def __init__(self, capacity, use_global_state=False):
         self.buffer = {}
         self.capacity = capacity
         self.is_full = False
+        self.states = []
+        self.use_global_state = use_global_state
 
-    def record_step(self, ids, obs, acts, rewards, alives):
+    def record_step(self, ids, obs, acts, rewards, alives, state=None):
         """record transitions (s, a, r, terminal) in a step"""
         buffer = self.buffer
         index = np.random.permutation(len(ids))
+
+        if self.use_global_state:
+            self.states.append(state.copy())
 
         if self.is_full:  # extract loop invariant in else part
             for i in range(len(ids)):
@@ -69,6 +74,7 @@ class EpisodesBuffer:
         """ clear replay buffer """
         self.buffer = {}
         self.is_full = False
+        self.states = []
 
     def episodes(self):
         """ get episodes """

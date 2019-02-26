@@ -343,6 +343,9 @@ class GridWorld(Environment):
         """
         return self.feature_space[handle.value]
 
+    def get_state_space(self):
+        return self.state_buf.shape
+
     def get_agent_id(self, handle):
         """ get agent id
 
