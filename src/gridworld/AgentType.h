@@ -41,6 +41,8 @@ public:
 
     /** special for demo **/
     bool can_absorb;
+    bool can_gather;
+    bool can_be_gathered;
 
     /***** system calculated setting *****/
     std::string name;

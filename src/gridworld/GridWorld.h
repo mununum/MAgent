@@ -133,7 +133,8 @@ public:
     Agent(AgentType &type, int id, GroupHandle group) : dead(false), absorbed(false), group(group),
                                                         next_reward(0),
                                                         type(type),
-                                                        last_op(OP_NULL), op_obj(nullptr), index(0) {
+                                                        last_op(OP_NULL), op_obj(nullptr), index(0),
+                                                        gathered(false) {
         this->id = id;
         dir = Direction(rand() % 4);
         hp = type.hp;
@@ -191,6 +192,9 @@ public:
     bool is_absorbed() const { return absorbed; }
     void set_absorbed(bool value) { absorbed = value; }
 
+    bool is_gathered() const { return gathered; }
+    void set_gathered(bool value) { absorbed = value; }
+
     bool starve() {
         if (type.step_recover > 0) {
             add_hp(type.step_recover);
@@ -231,6 +235,7 @@ private:
     int id;
     bool dead;
     bool absorbed;
+    bool gathered;
 
     Position pos;
     Direction dir;

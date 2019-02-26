@@ -48,6 +48,8 @@ AgentType::AgentType(int n, std::string name, const char **keys, float *values, 
     can_absorb = false;
 
     restrict_movement = false;
+    can_gather = false;
+    can_be_gathered = false;
 
     // init member vars from str (reflection)
     bool is_set;
@@ -81,6 +83,9 @@ AgentType::AgentType(int n, std::string name, const char **keys, float *values, 
 
         AGENT_TYPE_SET_BOOL(restrict_movement);
         AGENT_TYPE_SET_INT(movement_direction);
+
+        AGENT_TYPE_SET_BOOL(can_gather);
+        AGENT_TYPE_SET_BOOL(can_be_gathered);
 
         if (!is_set) {
             LOG(FATAL) << "invalid agent config in AgentType::AgentType : " << keys[i];

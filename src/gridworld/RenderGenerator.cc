@@ -151,11 +151,16 @@ void RenderGenerator::render_a_frame(std::vector<Group> &groups, const Map &map)
 
         bool can_absorb = agents[0]->get_type().can_absorb;
         // when type.can_absorb is true, do not render it if it is not absorbed
+        bool can_be_gathered = agents[0]->get_type().can_be_gathered;
+        // when type.can_be_gathered is true, do not render it if it is gathered
 
         for (int j = 0; j < agents.size(); j++) {
             const Agent &agent = *agents[j];
 
             if (can_absorb && !agent.is_absorbed())
+                continue;
+
+            if (can_be_gathered && agent.is_gathered())
                 continue;
 
             Position pos = agent.get_pos();
