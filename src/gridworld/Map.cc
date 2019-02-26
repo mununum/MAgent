@@ -347,7 +347,32 @@ Reward Map::do_move(Agent *agent, const int delta[2]) {
                     agent->set_last_op(OP_COLLIDE);
                     agent->set_op_obj(collide);
                 }
-            } else {
+            } 
+            else if (obj->get_type().can_be_gathered && agent->get_type().can_gather) {
+                if (!obj-> is_gathered()) {
+                    obj->set_gathered(true);
+                    obj->set_dead(true);
+                    remove_agent(obj);
+
+                    PositionInteger old_pos_int = pos2int(pos);
+
+                    // backup old
+                    void *occupier = slots[old_pos_int].occupier;
+                    OccupyType occ_type = slots[old_pos_int].occ_type;
+                    int channel_id  = channel_ids[old_pos_int];
+
+                    clear_area(pos.x, pos.y, width, height);
+                    fill_area(new_x, new_y, width, height, occupier, occ_type, channel_id);
+
+                    pos.x = new_x;
+                    pos.y = new_y;
+
+                    agent->set_last_op(OP_COLLIDE);
+                    agent->set_op_obj(collide);
+                    
+                }
+            } 
+            else {
                 agent->set_last_op(OP_COLLIDE);
                 agent->set_op_obj(collide);
             }
